@@ -141,6 +141,7 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 3.16
       ret.centerToFront = ret.wheelbase * 0.4
       ret.steerRatio = 12.069
+      tire_stiffness_factor = 0.88      
     # hyundai
     elif candidate == CAR.TUCSON:
       ret.mass = 3520. * CV.LB_TO_KG
