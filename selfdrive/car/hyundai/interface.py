@@ -372,25 +372,25 @@ class CarInterface(CarInterfaceBase):
     ret.enableBsm = 0x58b in fingerprint[0]
     ret.enableAutoHold = 1151 in fingerprint[0]
 
-    # ignore CAN2 address if L-CAN on the same BUS
-    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
-    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
-    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
-                                                                     else 2 if 1056 in fingerprint[2] else -1
-
-    if ret.sccBus >= 0:
-      ret.hasScc13 = 1290 in fingerprint[ret.sccBus]
-      ret.hasScc14 = 905 in fingerprint[ret.sccBus]
-
-    ret.hasEms = 608 in fingerprint[0] and 809 in fingerprint[0]
-    ret.hasLfaHda = 1157 in fingerprint[0]
-
-    ret.radarOffCan = ret.sccBus == -1
-    ret.pcmCruise = not ret.radarOffCan
-
-    # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
-    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
-      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
+#    # ignore CAN2 address if L-CAN on the same BUS
+#    ret.mdpsBus = 1 if 593 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+#    ret.sasBus = 1 if 688 in fingerprint[1] and 1296 not in fingerprint[1] else 0
+#    ret.sccBus = 0 if 1056 in fingerprint[0] else 1 if 1056 in fingerprint[1] and 1296 not in fingerprint[1] \
+#                                                                     else 2 if 1056 in fingerprint[2] else -1
+#
+#    if ret.sccBus >= 0:
+#      ret.hasScc13 = 1290 in fingerprint[ret.sccBus]
+#      ret.hasScc14 = 905 in fingerprint[ret.sccBus]
+#
+#    ret.hasEms = 608 in fingerprint[0] and 809 in fingerprint[0]
+#    ret.hasLfaHda = 1157 in fingerprint[0]
+#
+#    ret.radarOffCan = ret.sccBus == -1
+#    ret.pcmCruise = not ret.radarOffCan
+#
+#    # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
+#    if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
+#      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
     return ret
 
   # @staticmethod
@@ -408,11 +408,11 @@ class CarInterface(CarInterfaceBase):
 
   def update(self, c: car.CarControl, can_strings: List[bytes]) -> car.CarState:
     self.cp.update_strings(can_strings)
-    self.cp2.update_strings(can_strings)
+    #self.cp2.update_strings(can_strings)
     self.cp_cam.update_strings(can_strings)
 
-    ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
-    ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
+    ret = self.CS.update(self.cp, self.cp_cam)
+    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers if cp is not None)
 
     if self.CP.pcmCruise and not self.CC.scc_live:
